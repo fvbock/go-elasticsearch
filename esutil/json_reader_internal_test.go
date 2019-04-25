@@ -3,6 +3,7 @@
 package esutil
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -39,6 +40,15 @@ func TestJSONReader(t *testing.T) {
 		out, _ := ioutil.ReadAll(JSONReader(Foo{Bar: "baz"}))
 		if string(out) != `{"bar":"BAZ"}`+"\n" {
 			t.Fatalf("Unexpected output: %s", out)
+		}
+	})
+
+	t.Run("WriteTo", func(t *testing.T) {
+		b := bytes.NewBuffer([]byte{})
+		r := jsonReader{val: map[string]string{"foo": "bar"}}
+		r.WriteTo(b)
+		if b.String() != `{"foo":"bar"}`+"\n" {
+			t.Fatalf("Unexpected output: %s", b.String())
 		}
 	})
 

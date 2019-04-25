@@ -24,13 +24,34 @@ type jsonReader struct {
 }
 
 func (r *jsonReader) Read(p []byte) (int, error) {
-	if r.buf == nil {
-		r.buf = new(bytes.Buffer)
-		if err := r.encode(); err != nil {
-			return 0, err
-		}
+	if err := r.initialize(); err != nil {
+		return 0, err
 	}
 	return r.buf.Read(p)
+}
+
+func (r *jsonReader) WriteTo(w io.Writer) (int64, error) {
+	if err := r.initialize(); err != nil {
+		return 0, err
+	}
+	if b, ok := r.buf.(*bytes.Buffer); ok {
+		return b.WriteTo(w)
+	}
+	// TODO(karmi): Too defensive?
+	var b []byte
+	_, err := r.buf.Read(b)
+	if err != nil {
+		return 0, err
+	}
+	return bytes.NewBuffer(b).WriteTo(w)
+}
+
+func (r *jsonReader) initialize() error {
+	if r.buf == nil {
+		r.buf = new(bytes.Buffer)
+		return r.encode()
+	}
+	return nil
 }
 
 func (r *jsonReader) encode() error {

@@ -59,6 +59,18 @@ func BenchmarkJSONReader(b *testing.B) {
 		}
 	})
 
+	b.Run("Default-Copy", func(b *testing.B) {
+		b.ResetTimer()
+
+		for i := 0; i < b.N; i++ {
+			var buf bytes.Buffer
+			io.Copy(&buf, esutil.JSONReader(map[string]string{"foo": "bar"}))
+			if buf.String() != `{"foo":"bar"}`+"\n" {
+				b.Fatalf("Unexpected output: %q", buf.String())
+			}
+		}
+	})
+
 	b.Run("Custom", func(b *testing.B) {
 		b.ResetTimer()
 
