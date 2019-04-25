@@ -13,8 +13,9 @@ import (
 
 type errReader struct{}
 
-func (errReader) Read(p []byte) (n int, err error)  { return 1, errors.New("MOCK ERROR") }
-func (errReader) Write(p []byte) (n int, err error) { return 0, errors.New("MOCK ERROR") }
+func (errReader) Read(p []byte) (int, error)         { return 1, errors.New("MOCK ERROR") }
+func (errReader) Write(p []byte) (int, error)        { return 0, errors.New("MOCK ERROR") }
+func (errReader) WriteTo(w io.Writer) (int64, error) { return 0, errors.New("MOCK ERROR") }
 
 type Foo struct {
 	Bar string

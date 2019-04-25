@@ -20,7 +20,10 @@ type JSONEncoder interface {
 
 type jsonReader struct {
 	val interface{}
-	buf io.ReadWriter
+	buf interface {
+		io.ReadWriter
+		io.WriterTo
+	}
 }
 
 func (r *jsonReader) Read(p []byte) (int, error) {
@@ -34,16 +37,7 @@ func (r *jsonReader) WriteTo(w io.Writer) (int64, error) {
 	if err := r.initialize(); err != nil {
 		return 0, err
 	}
-	if b, ok := r.buf.(*bytes.Buffer); ok {
-		return b.WriteTo(w)
-	}
-	// TODO(karmi): Too defensive?
-	var b []byte
-	_, err := r.buf.Read(b)
-	if err != nil {
-		return 0, err
-	}
-	return bytes.NewBuffer(b).WriteTo(w)
+	return r.buf.WriteTo(w)
 }
 
 func (r *jsonReader) initialize() error {
